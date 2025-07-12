@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRIDLOCK - BDC Gamification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles for the Game Interface */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e7eb;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        /* --- Glassmorphism & Glow Effects --- */
+        .glass-ui {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .neon-glow-purple {
+            box-shadow: 0 0 5px rgba(168, 85, 247, 0.8), 0 0 20px rgba(168, 85, 247, 0.6), 0 0 40px rgba(168, 85, 247, 0.4);
+        }
+        
+        .text-glow-purple {
+            text-shadow: 0 0 8px rgba(192, 132, 252, 0.8), 0 0 12px rgba(168, 85, 247, 0.6);
+        }
+
+        /* --- Screen & Modal Transitions --- */
+        .screen, .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            z-index: 40;
+        }
+        .screen.active, .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-overlay {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- Main Garage Car & Underglow --- */
+        #main-car-container { animation: rotateCar 30s linear infinite; filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.7)); }
+        #main-car-underglow { filter: blur(40px); transform: translateY(20px) scale(1.1); opacity: 0.7; animation: pulse-glow 3s infinite alternate; transition: color 0.5s ease; }
+        @keyframes rotateCar { from { transform: perspective(2000px) rotateY(20deg); } to { transform: perspective(2000px) rotateY(380deg); } }
+        @keyframes pulse-glow { from { opacity: 0.6; } to { opacity: 0.9; } }
+
+        /* --- Shop Item States --- */
+        .item-card.locked { filter: grayscale(80%); opacity: 0.7; cursor: not-allowed; }
+        .item-card.owned { border-color: #22c55e !important; }
+        .item-card.active-item { border-color: #a855f7 !important; box-shadow: 0 0 15px rgba(168, 85, 247, 0.6); }
+
+        /* --- Shop Tabs --- */
+        .shop-tab { transition: all 0.3s ease; border-bottom: 2px solid transparent; }
+        .shop-tab.active { color: #a855f7; border-bottom-color: #a855f7; }
+        .shop-content { display: none; }
+        .shop-content.active { display: grid; }
+
+        /* --- Live Feed Animation --- */
+        .feed-item {
+            animation: slideIn 0.5s ease forwards;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* --- Metallic Badge Gradients --- */
+        .badge-silver { background: linear-gradient(145deg, #e0e0e0, #b0b0b0); }
+        .badge-gold { background: linear-gradient(145deg, #fde047, #eab308); }
+        .badge-holographic { background: linear-gradient(145deg, #f97316, #ec4899, #8b5cf6, #3b82f6); background-size: 400% 400%; animation: gradientBG 5s ease infinite; }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .achievement-card.unlocked { opacity: 1; border-color: #fde047; }
+        .achievement-card.locked { opacity: 0.6; filter: grayscale(50%); }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.6); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.9); }
+    </style>
+</head>
+<body id="body-container" class="bg-black text-white">
+
+    <canvas id="particle-canvas" class="fixed top-0 left-0 w-full h-full z-0"></canvas>
+
+    <!-- MAIN GARAGE VIEW -->
+    <div id="main-garage" class="screen active">
+        <aside class="glass-ui fixed top-0 left-0 h-full w-full max-w-xs p-6 flex flex-col space-y-6 z-30 transition-transform duration-300 -translate-x-full md:translate-x-0 overflow-y-auto">
+            <!-- User Profile -->
+            <div class="flex items-center space-x-4">
+                <img src="https://i.pravatar.cc/80?u=player1" alt="User Avatar" class="w-16 h-16 rounded-full border-2 border-purple-400 neon-glow-purple">
+                <div>
+                    <h2 class="text-xl font-bold text-glow-purple">VAPORWAVE_DRIFTER</h2>
+                    <div class="flex items-center space-x-2 mt-1">
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <span id="points-counter" class="text-lg font-semibold">0</span>
+                    </div>
+                    <div id="multiplier-display" class="text-xs text-cyan-400 font-bold mt-1"></div>
+                </div>
+            </div>
+            
+            <!-- Live Event Feed -->
+            <div>
+                <h3 class="text-lg font-semibold mb-3 text-glow-purple">Live Event Feed</h3>
+                <div id="live-feed" class="space-y-3 h-48 overflow-y-auto pr-2">
+                    <!-- Events will be injected here -->
+                </div>
+            </div>
+
+            <!-- My Gear -->
+            <div id="my-gear-container" class="hidden">
+                <h3 class="text-lg font-semibold mb-3 text-glow-purple">My Gear</h3>
+                <div id="my-gear-grid" class="grid grid-cols-4 gap-2"></div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div>
+                <h3 class="text-lg font-semibold mb-3 text-glow-purple">Team Leaderboard</h3>
+                <ul id="leaderboard" class="space-y-3"></ul>
+            </div>
+        </aside>
+
+        <main class="w-full h-full flex items-center justify-center">
+            <div id="main-car-container" class="relative w-full h-full flex items-center justify-center">
+                <img id="main-car-underglow" src="https://assets.codepen.io/1556513/lexus-is-350-f-sport-white.png" alt="Car Underglow" class="absolute w-auto h-1/2 md:h-2/3 max-w-4xl object-contain">
+                <img id="main-car" src="https://assets.codepen.io/1556513/lexus-is-350-f-sport-white.png" alt="Lexus IS 350 F Sport" class="w-auto h-1/2 md:h-2/3 max-w-4xl object-contain">
+            </div>
+        </main>
+
+        <nav class="fixed bottom-8 right-8 flex flex-col space-y-4 z-50">
+            <button onclick="switchScreen('customization-shop')" class="nav-button glass-ui rounded-full p-4 hover:bg-purple-500/50 transition-all duration-300 hover:neon-glow-purple"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+            <button onclick="switchScreen('achievements')" class="nav-button glass-ui rounded-full p-4 hover:bg-purple-500/50 transition-all duration-300 hover:neon-glow-purple"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0h6M9 19a2 2 0 00-2 2h10a2 2 0 00-2-2M9 19c-1.105 0-2-.895-2-2V7a2 2 0 012-2h6a2 2 0 012 2v10c0 1.105-.895 2-2 2M9 19c-1.105 0-2-.895-2-2V7a2 2 0 012-2h6a2 2 0 012 2v10c0 1.105-.895 2-2 2"></path></svg></button>
+        </nav>
+    </div>
+
+    <!-- CUSTOMIZATION SHOP VIEW -->
+    <div id="customization-shop" class="screen">
+        <div class="p-8 md:p-16 overflow-y-auto h-full">
+            <button onclick="switchScreen('main-garage')" class="absolute top-8 left-8 glass-ui rounded-full p-3 hover:bg-purple-500/50 transition-all duration-300 hover:neon-glow-purple z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+            <div class="text-center mb-8">
+                <h1 class="text-5xl font-black uppercase text-glow-purple">Customization</h1>
+                <p class="text-gray-400">Upgrade your experience.</p>
+            </div>
+            <div class="flex justify-center space-x-4 sm:space-x-8 border-b border-gray-700 mb-8">
+                <button class="shop-tab active" onclick="switchShopTab('cars')">Cars</button>
+                <button class="shop-tab" onclick="switchShopTab('performance')">Performance</button>
+                <button class="shop-tab" onclick="switchShopTab('visuals')">Visuals</button>
+                <button class="shop-tab" onclick="switchShopTab('garage')">Garage</button>
+            </div>
+            <div id="shop-content-cars" class="shop-content active grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"></div>
+            <div id="shop-content-performance" class="shop-content grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"></div>
+            <div id="shop-content-visuals" class="shop-content grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"></div>
+            <div id="shop-content-garage" class="shop-content grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"></div>
+        </div>
+    </div>
+
+    <!-- ACHIEVEMENTS SCREEN -->
+    <div id="achievements" class="screen">
+         <div class="p-8 md:p-16 overflow-y-auto h-full">
+            <button onclick="switchScreen('main-garage')" class="absolute top-8 left-8 glass-ui rounded-full p-3 hover:bg-purple-500/50 transition-all duration-300 hover:neon-glow-purple z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+            <div class="text-center mb-12"><h1 class="text-5xl font-black uppercase text-glow-purple">Trophy Case</h1></div>
+            <div id="achievement-grid" class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </div>
+
+    <!-- PLAYER INSPECTOR MODAL -->
+    <div id="player-inspector-modal" class="modal-overlay">
+        <div class="glass-ui rounded-lg w-11/12 max-w-2xl p-8 relative border-2 border-purple-500 neon-glow-purple">
+            <button onclick="closeInspector()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            <div id="inspector-content"></div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notification" class="fixed bottom-8 left-1/2 -translate-x-1/2 glass-ui p-4 rounded-lg z-50 flex items-center space-x-3">
+        <span id="notification-text"></span>
+    </div>
+
+    <script>
+        // --- DATA MODELS ---
+        let playerData = {
+            name: 'VAPORWAVE_DRIFTER',
+            points: 0,
+            owned: { cars: ['is350'], performance: [], visual: [], garageTheme: ['showroom'], garageAccessory: [] },
+            stats: { outboundCall: 0, inboundCall: 0, appointmentSet: 0, appointmentShow: 0, dealClosed: 0 },
+            unlockedAchievements: [],
+            lastLogin: null,
+            pointMultiplier: 1.0,
+            active: { car: 'is350', underglow: '#a855f7', garageTheme: 'showroom' },
+        };
+
+        const kpiData = { outboundCall: { points: 5, label: 'Outbound Call' }, inboundCall: { points: 10, label: 'Inbound Call' }, appointmentSet: { points: 50, label: 'Appointment Set' }, appointmentShow: { points: 100, label: 'Appointment Showed' }, dealClosed: { points: 250, label: 'Deal Closed' }, };
+        const carData = [ { id: 'is350', name: 'IS 350 F Sport', cost: 0, rarity: 'common', img: 'https://assets.codepen.io/1556513/lexus-is-350-f-sport-white.png' }, { id: 'rx450h', name: 'RX 450h', cost: 1800, rarity: 'rare', img: 'https://assets.codepen.io/1556513/lexus-rx-450h-black.png' }, { id: 'lc500', name: 'LC 500', cost: 2500, rarity: 'rare', img: 'https://assets.codepen.io/1556513/lexus-lc-500-red.png' }, { id: 'porsche911', name: '911 Turbo S', cost: 4500, rarity: 'legendary', img: 'https://assets.codepen.io/1556513/porsche-911-turbo-s-blue.png' }, { id: 'ferrari488', name: '488 GTB', cost: 4800, rarity: 'legendary', img: 'https://assets.codepen.io/1556513/ferrari-488-gtb-red.png' }, { id: 'aventador', name: 'Aventador', cost: 5000, rarity: 'legendary', img: 'https://assets.codepen.io/1556513/lamborghini-aventador-yellow.png' } ];
+        const upgradeData = {
+            performance: [ { id: 'engine1', name: 'Engine Tune Lvl 1', cost: 1000, bonus: 0.05, description: '+5% Point Bonus' }, { id: 'turbo1', name: 'Turbo Kit Lvl 1', cost: 1500, bonus: 0.07, description: '+7% Point Bonus' }, { id: 'engine2', name: 'Engine Tune Lvl 2', cost: 3000, bonus: 0.10, description: '+10% Point Bonus' }, ],
+            visual: [ { id: 'ug_purple', name: 'Neon Purple Glow', cost: 200, value: '#a855f7', type: 'underglow' }, { id: 'ug_blue', name: 'Electric Blue Glow', cost: 200, value: '#3b82f6', type: 'underglow' }, { id: 'ug_gold', name: 'Gold Glow', cost: 500, value: '#facc15', type: 'underglow' }, ],
+            garageTheme: [ { id: 'showroom', name: 'The Showroom', cost: 0, img: 'https://images.unsplash.com/photo-1614026480421-a892021c43a2?q=80&w=1974&auto=format&fit=crop' }, { id: 'underground', name: 'Underground Lair', cost: 3000, img: 'https://images.unsplash.com/photo-1589149024924-31809a73e945?q=80&w=1932&auto=format&fit=crop' }, { id: 'penthouse', name: 'Penthouse View', cost: 5000, img: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=2070&auto=format&fit=crop' }, ],
+            garageAccessory: [ { id: 'neonsign', name: 'GRIDLOCK Neon Sign', cost: 750, icon: '⚡️' }, { id: 'toolbox', name: 'Pro Tool Cabinet', cost: 1200, icon: '🛠️' }, { id: 'speakers', name: 'Sound System', cost: 1500, icon: '🔊' }, ]
+        };
+        const achievementData = [
+            { id: 'firstCall', title: 'On the Line', description: 'Log your first call.', goal: { type: 'stat', key: 'outboundCall', value: 1 }, reward: 50, badge: 'C', tier: 'silver' },
+            { id: 'tenCalls', title: 'Warm Caller', description: 'Log 10 total calls.', goal: { type: 'stat', key: 'totalCalls', value: 10 }, reward: 100, badge: 'C', tier: 'silver' },
+            { id: 'firstAppt', title: 'On the Books', description: 'Set your first appointment.', goal: { type: 'stat', key: 'appointmentSet', value: 1 }, reward: 100, badge: 'A', tier: 'gold' },
+            { id: 'firstDeal', title: 'Deal Maker', description: 'Close your first deal.', goal: { type: 'stat', key: 'dealClosed', value: 1 }, reward: 500, badge: 'D', tier: 'gold' },
+            { id: 'firstCar', title: 'New Wheels', description: 'Buy your first car.', goal: { type: 'car', key: 'any', value: 2 }, reward: 200, badge: 'K', tier: 'silver' },
+            { id: 'legendaryOwner', title: 'Collector', description: 'Own a legendary car.', goal: { type: 'car', key: 'legendary', value: 1 }, reward: 1000, badge: 'L', tier: 'holographic' },
+        ];
+        let teamData = {
+            'NIGHT_SHADE': { points: 5200, active: {car: 'aventador'}, unlockedAchievements: ['firstDeal', 'legendaryOwner'] },
+            'GHOST_RACER': { points: 4500, active: {car: 'porsche911'}, unlockedAchievements: ['firstAppt'] }
+        };
+
+        // --- DATA PERSISTENCE ---
+        function saveData() {
+            localStorage.setItem('gridlock_playerData', JSON.stringify(playerData));
+            localStorage.setItem('gridlock_teamData', JSON.stringify(teamData));
+        }
+
+        function loadData() {
+            const savedPlayerData = localStorage.getItem('gridlock_playerData');
+            const savedTeamData = localStorage.getItem('gridlock_teamData');
+            if (savedPlayerData) {
+                playerData = JSON.parse(savedPlayerData);
+            }
+            if (savedTeamData) {
+                teamData = JSON.parse(savedTeamData);
+            }
+        }
+
+        // --- CORE GAMIFICATION LOGIC ---
+        function processEvent(kpiKey) {
+            dailyLoginCheck();
+            const kpi = kpiData[kpiKey];
+            if (!kpi) return;
+            const basePoints = kpi.points;
+            const pointsEarned = Math.round(basePoints * playerData.pointMultiplier);
+            playerData.stats[kpiKey]++;
+            addPoints(pointsEarned);
+            showNotification(`+${pointsEarned} pts for ${kpi.label}!`);
+            checkAchievements();
+        }
+
+        function addPoints(amount) {
+            const initialPoints = playerData.points;
+            playerData.points += amount;
+            animatePoints(initialPoints, playerData.points);
+            updateLeaderboard();
+            saveData();
+        }
+
+        function buyItem(type, itemId) {
+            const itemData = (upgradeData[type] || carData).find(i => i.id === itemId);
+            if (!itemData || playerData.owned[type].includes(itemId)) return;
+
+            if (playerData.points >= itemData.cost) {
+                playerData.points -= itemData.cost;
+                playerData.owned[type].push(itemId);
+                
+                let message = `Purchased ${itemData.name}!`;
+                if (type === 'performance') { playerData.pointMultiplier += itemData.bonus; updateMultiplierDisplay(); } 
+                else if (type === 'visual') { activateVisual('underglow', itemData.value); message = `Applied ${itemData.name}!`; }
+                else if (type === 'garageTheme') { activateVisual('garageTheme', itemData.id); message = `Switched to ${itemData.name}!`; }
+                else if (type === 'garageAccessory') { renderMyGear(); }
+                else if (type === 'cars') { activateVisual('car', itemData.id); message = `Unlocked the ${itemData.name}!`; }
+
+                showNotification(message, "success");
+                renderShop();
+                checkAchievements();
+                saveData();
+            } else {
+                showNotification("Not enough points!", "error");
+            }
+        }
+        
+        function activateVisual(type, value) {
+            playerData.active[type] = value;
+            if (type === 'car') {
+                const car = carData.find(c => c.id === value);
+                if(car) {
+                    document.getElementById('main-car').src = car.img;
+                    document.getElementById('main-car').alt = car.name;
+                    document.getElementById('main-car-underglow').src = car.img;
+                }
+            } else if (type === 'underglow') {
+                document.getElementById('main-car-underglow').style.color = value;
+            } else if (type === 'garageTheme') {
+                const theme = upgradeData.garageTheme.find(t => t.id === value);
+                if(theme) document.getElementById('body-container').style.backgroundImage = `url('${theme.img}')`;
+            }
+            renderShop();
+            saveData();
+        }
+        
+        function checkAchievements() {
+            achievementData.forEach(ach => {
+                if (playerData.unlockedAchievements.includes(ach.id)) return;
+                let goalMet = false;
+                if (ach.goal.type === 'stat') {
+                    if(ach.goal.key === 'totalCalls') {
+                        if(playerData.stats.outboundCall + playerData.stats.inboundCall >= ach.goal.value) goalMet = true;
+                    } else {
+                        if (playerData.stats[ach.goal.key] >= ach.goal.value) goalMet = true;
+                    }
+                } else if (ach.goal.type === 'car') {
+                    if (ach.goal.key === 'any' && playerData.owned.cars.length >= ach.goal.value) goalMet = true;
+                    else if (ach.goal.key === 'legendary') {
+                        const legendaryOwned = playerData.owned.cars.some(carId => carData.find(c => c.id === carId)?.rarity === 'legendary');
+                        if (legendaryOwned) goalMet = true;
+                    }
+                }
+
+                if (goalMet) {
+                    playerData.unlockedAchievements.push(ach.id);
+                    addPoints(ach.reward);
+                    showNotification(`Achievement Unlocked: ${ach.title}! (+${ach.reward} pts)`, 'achievement');
+                }
+            });
+        }
+        
+        function dailyLoginCheck() {
+            const today = new Date().toDateString();
+            if (playerData.lastLogin !== today) {
+                playerData.lastLogin = today;
+                addPoints(100);
+                showNotification("Daily Login Bonus: +100 pts!", "success");
+                saveData();
+            }
+        }
+
+        // --- UI & RENDERING ---
+        function switchShopTab(tabName) {
+            document.querySelectorAll('.shop-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.shop-tab[onclick="switchShopTab('${tabName}')"]`).classList.add('active');
+            document.querySelectorAll('.shop-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`shop-content-${tabName}`).classList.add('active');
+        }
+
+        function renderShop() {
+            const grids = {
+                cars: { data: carData, type: 'cars' },
+                performance: { data: upgradeData.performance, type: 'performance' },
+                visual: { data: upgradeData.visual, type: 'visual' },
+                garage: { data: [...upgradeData.garageTheme, ...upgradeData.garageAccessory], type: null },
+            };
+
+            for (const [key, gridInfo] of Object.entries(grids)) {
+                const gridEl = document.getElementById(`shop-content-${key}`);
+                if(!gridEl) continue;
+                gridEl.innerHTML = '';
+                gridInfo.data.forEach(item => {
+                    const itemType = gridInfo.type || (item.icon ? 'garageAccessory' : 'garageTheme');
+                    const isOwned = playerData.owned[itemType].includes(item.id);
+                    const canAfford = playerData.points >= item.cost;
+                    const isActive = playerData.active[itemType] === item.id || playerData.active[itemType] === item.value;
+                    const cardClasses = `item-card glass-ui p-4 rounded-lg text-center border-2 border-transparent transition-all cursor-pointer ${isActive ? 'active-item' : ''} ${isOwned ? 'owned' : ''} ${!isOwned && !canAfford ? 'locked' : ''}`;
+                    
+                    let cardHTML = `<div class="${cardClasses}" onclick="${isOwned && !isActive ? `activateVisual('${itemType}', '${item.id || item.value}')` : !isOwned ? `buyItem('${itemType}', '${item.id}')` : ''}">`;
+                    
+                    if (key === 'cars') cardHTML += `<img src="${item.img}" class="h-40 mx-auto" alt="${item.name}"><h3 class="text-xl font-bold mt-4">${item.name}</h3>`;
+                    else cardHTML += `<h3 class="font-bold text-lg">${item.name}</h3>`;
+
+                    if (item.description) cardHTML += `<p class="text-cyan-400 font-semibold text-sm">${item.description}</p>`;
+                    if (item.icon) cardHTML += `<div class="text-4xl my-2">${item.icon}</div>`;
+                    if (item.type === 'underglow') cardHTML += `<div class="w-16 h-8 rounded mx-auto my-2" style="background-color: ${item.value}; box-shadow: 0 0 15px ${item.value};"></div>`;
+                    if (itemType === 'garageTheme') cardHTML += `<img src="${item.img}" class="w-full h-24 object-cover rounded-md my-2" alt="${item.name}">`;
+
+                    cardHTML += `<div class="mt-2 text-sm font-semibold">${isOwned ? `<span class="text-green-400">${isActive ? 'ACTIVE' : 'OWNED'}</span>` : `<span>${item.cost.toLocaleString()} pts</span>`}</div></div>`;
+                    gridEl.innerHTML += cardHTML;
+                });
+            }
+        }
+        
+        function renderAchievements() {
+            const grid = document.getElementById('achievement-grid');
+            grid.innerHTML = '';
+            achievementData.forEach(ach => {
+                const isUnlocked = playerData.unlockedAchievements.includes(ach.id);
+                const cardClasses = `achievement-card glass-ui p-4 rounded-lg flex flex-col items-center text-center space-y-3 border-t-4 ${isUnlocked ? 'unlocked' : 'locked'}`;
+                
+                let progressText = '';
+                let progressPercent = isUnlocked ? 100 : 0;
+                if (!isUnlocked && ach.goal.type === 'stat') {
+                    const current = ach.goal.key === 'totalCalls' ? (playerData.stats.outboundCall + playerData.stats.inboundCall) : playerData.stats[ach.goal.key];
+                    progressPercent = Math.min((current / ach.goal.value) * 100, 100);
+                    progressText = `(${current}/${ach.goal.value})`;
+                } else if (!isUnlocked && ach.goal.type === 'car') {
+                     const current = playerData.owned.cars.length;
+                     progressPercent = Math.min((current / ach.goal.value) * 100, 100);
+                     progressText = `(${current}/${ach.goal.value})`;
+                }
+
+                const cardHTML = `
+                    <div class="${cardClasses}">
+                        <div class="w-20 h-20 rounded-full flex items-center justify-center badge-${ach.tier} text-slate-800 font-black text-4xl shadow-lg">${ach.badge}</div>
+                        <h3 class="font-bold">${ach.title}</h3>
+                        <p class="text-xs text-gray-400">${ach.description} ${progressText}</p>
+                        <div class="w-full bg-gray-700 rounded-full h-1.5 mt-auto">
+                           <div class="bg-yellow-400 h-1.5 rounded-full" style="width: ${progressPercent}%"></div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHTML;
+            });
+        }
+
+        function renderMyGear() {
+            const gearGrid = document.getElementById('my-gear-grid');
+            const container = document.getElementById('my-gear-container');
+            gearGrid.innerHTML = '';
+            const ownedAccessories = playerData.owned.garageAccessory;
+
+            if (ownedAccessories.length > 0) {
+                container.classList.remove('hidden');
+                ownedAccessories.forEach(itemId => {
+                    const item = upgradeData.garageAccessory.find(i => i.id === itemId);
+                    if (item) gearGrid.innerHTML += `<div class="glass-ui rounded-lg p-2 text-2xl text-center" title="${item.name}">${item.icon}</div>`;
+                });
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function updateLeaderboard() {
+            let fullLeaderboard = [
+                { name: playerData.name, points: playerData.points, isPlayer: true },
+                ...Object.entries(teamData).map(([name, data]) => ({ name, ...data, isPlayer: false }))
+            ];
+            fullLeaderboard.sort((a, b) => b.points - a.points);
+            
+            const leaderboardEl = document.getElementById('leaderboard');
+            leaderboardEl.innerHTML = '';
+            fullLeaderboard.forEach((p, index) => {
+                const rank = index + 1;
+                const li = document.createElement('li');
+                li.className = `flex items-center justify-between text-sm ${p.isPlayer ? 'font-bold text-blue-300' : ''}`;
+                const nameEl = p.isPlayer ? `<span>${rank}. ${p.name}</span>` : `<button class="text-left hover:text-purple-400 transition" onclick="inspectPlayer('${p.name}')">${rank}. ${p.name}</button>`;
+                li.innerHTML = `${nameEl} <span class="${p.isPlayer ? 'text-blue-400' : 'text-gray-400'}">${p.points.toLocaleString()} pts</span>`;
+                leaderboardEl.appendChild(li);
+            });
+        }
+
+        function inspectPlayer(playerName) {
+            const playerData = teamData[playerName];
+            if (!playerData) return;
+            
+            const car = carData.find(c => c.id === playerData.active.car);
+            const contentEl = document.getElementById('inspector-content');
+
+            let achievementsHTML = '<p class="text-sm text-gray-400">No Trophies Yet</p>';
+            if(playerData.unlockedAchievements.length > 0) {
+                achievementsHTML = playerData.unlockedAchievements.map(achId => {
+                    const ach = achievementData.find(a => a.id === achId);
+                    return `<div class="badge-${ach.tier} text-slate-800 rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl" title="${ach.title}">${ach.badge}</div>`;
+                }).join('');
+            }
+
+            contentEl.innerHTML = `
+                <h2 class="text-3xl font-bold text-glow-purple mb-4">${playerName}</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-semibold mb-2">Showcase Car</h3>
+                        <div class="glass-ui rounded-lg p-4">
+                            <img src="${car.img}" alt="${car.name}" class="w-full h-auto">
+                            <p class="text-center font-bold mt-2">${car.name}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">Stats</h3>
+                        <div class="glass-ui rounded-lg p-4 space-y-2">
+                            <p><strong>Points:</strong> ${playerData.points.toLocaleString()}</p>
+                            <h3 class="font-semibold pt-2">Trophy Case</h3>
+                            <div class="flex flex-wrap gap-2">${achievementsHTML}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('player-inspector-modal').classList.add('active');
+        }
+
+        function closeInspector() {
+            document.getElementById('player-inspector-modal').classList.remove('active');
+        }
+        
+        function updateMultiplierDisplay() {
+            const display = document.getElementById('multiplier-display');
+            if (playerData.pointMultiplier > 1.0) {
+                const bonusPercent = (playerData.pointMultiplier - 1) * 100;
+                display.innerText = `+${bonusPercent.toFixed(0)}% Point Bonus`;
+            } else { display.innerText = ''; }
+        }
+
+        function animatePoints(start, end) {
+            const counter = document.getElementById('points-counter');
+            const duration = 1000;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                counter.innerText = Math.floor(progress * (end - start) + start).toLocaleString();
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+        let notificationTimeout;
+        function showNotification(message, type = "info") {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            clearTimeout(notificationTimeout);
+            notificationText.innerText = message;
+            notification.className = 'fixed bottom-8 left-1/2 -translate-x-1/2 glass-ui p-4 rounded-lg z-50 flex items-center space-x-3';
+            if (type === 'success') notification.classList.add('border-t-4', 'border-green-500');
+            else if (type === 'error') notification.classList.add('border-t-4', 'border-red-500');
+            else if (type === 'achievement') notification.classList.add('border-t-4', 'border-yellow-400', 'neon-glow-purple');
+            notification.classList.add('active');
+            notificationTimeout = setTimeout(() => { notification.classList.remove('active'); }, 4000);
+        }
+
+        // --- SIMULATION & INITIALIZATION ---
+        const eventTypes = ['outboundCall', 'inboundCall', 'appointmentSet', 'appointmentShow', 'dealClosed'];
+        const eventWeights = [0.5, 0.3, 0.1, 0.07, 0.03]; // Probabilities
+
+        function simulateLiveEvent() {
+            const rand = Math.random();
+            let cumulativeWeight = 0;
+            let eventType = eventTypes[0];
+
+            for(let i=0; i < eventWeights.length; i++) {
+                cumulativeWeight += eventWeights[i];
+                if(rand < cumulativeWeight) {
+                    eventType = eventTypes[i];
+                    break;
+                }
+            }
+
+            const feedEl = document.getElementById('live-feed');
+            const newEvent = document.createElement('div');
+            newEvent.className = 'glass-ui p-2 rounded-md text-xs feed-item';
+            newEvent.innerHTML = `<span class="font-bold text-purple-300">[${new Date().toLocaleTimeString()}]</span> ${kpiData[eventType].label}`;
+            feedEl.prepend(newEvent);
+            if(feedEl.children.length > 10) {
+                feedEl.lastChild.remove();
+            }
+            processEvent(eventType);
+        }
+
+        function simulateOtherPlayers() {
+            Object.keys(teamData).forEach(name => {
+                teamData[name].points += Math.floor(Math.random() * 20);
+            });
+            updateLeaderboard();
+            saveData();
+        }
+        
+        function initApp() {
+            loadData();
+            renderShop();
+            renderMyGear();
+            updateLeaderboard();
+            updateMultiplierDisplay();
+            activateVisual('garageTheme', playerData.active.garageTheme);
+            activateVisual('car', playerData.active.car);
+            activateVisual('underglow', playerData.active.underglow);
+            animatePoints(0, playerData.points);
+            dailyLoginCheck();
+            setInterval(simulateLiveEvent, 6000);
+            setInterval(simulateOtherPlayers, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            const screenEl = document.getElementById(screenId);
+            if(screenEl) screenEl.classList.add('active');
+            if (screenId === 'customization-shop') renderShop();
+            if (screenId === 'achievements') renderAchievements();
+        }
+    </script>
+</body>
+</html>

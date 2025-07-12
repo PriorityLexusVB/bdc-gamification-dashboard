@@ -9,90 +9,33 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
-        /* Custom Styles for the Game Interface */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #e5e7eb;
-            overflow: hidden;
-            background-size: cover;
-            background-position: center;
-            transition: background-image 0.5s ease-in-out;
-        }
-
-        /* --- Glassmorphism & Glow Effects --- */
-        .glass-ui {
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .neon-glow-purple {
-            box-shadow: 0 0 5px rgba(168, 85, 247, 0.8), 0 0 20px rgba(168, 85, 247, 0.6), 0 0 40px rgba(168, 85, 247, 0.4);
-        }
-        
-        .text-glow-purple {
-            text-shadow: 0 0 8px rgba(192, 132, 252, 0.8), 0 0 12px rgba(168, 85, 247, 0.6);
-        }
-
-        /* --- Screen & Modal Transitions --- */
-        .screen, .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-            z-index: 40;
-        }
-        .screen.active, .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-overlay {
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* --- Main Garage Car & Underglow --- */
+        /* Styles remain largely the same as the previous version */
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #e5e7eb; overflow: hidden; background-size: cover; background-position: center; transition: background-image 0.5s ease-in-out; }
+        .glass-ui { background: rgba(10, 10, 10, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .neon-glow-purple { box-shadow: 0 0 5px rgba(168, 85, 247, 0.8), 0 0 20px rgba(168, 85, 247, 0.6), 0 0 40px rgba(168, 85, 247, 0.4); }
+        .text-glow-purple { text-shadow: 0 0 8px rgba(192, 132, 252, 0.8), 0 0 12px rgba(168, 85, 247, 0.6); }
+        .screen, .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; z-index: 40; }
+        .screen.active, .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
         #main-car-container { animation: rotateCar 30s linear infinite; filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.7)); }
         #main-car-underglow { filter: blur(40px); transform: translateY(20px) scale(1.1); opacity: 0.7; animation: pulse-glow 3s infinite alternate; transition: color 0.5s ease; }
         @keyframes rotateCar { from { transform: perspective(2000px) rotateY(20deg); } to { transform: perspective(2000px) rotateY(380deg); } }
         @keyframes pulse-glow { from { opacity: 0.6; } to { opacity: 0.9; } }
-
-        /* --- Shop Item States --- */
         .item-card.locked { filter: grayscale(80%); opacity: 0.7; cursor: not-allowed; }
         .item-card.owned { border-color: #22c55e !important; }
         .item-card.active-item { border-color: #a855f7 !important; box-shadow: 0 0 15px rgba(168, 85, 247, 0.6); }
-
-        /* --- Shop Tabs --- */
         .shop-tab { transition: all 0.3s ease; border-bottom: 2px solid transparent; }
         .shop-tab.active { color: #a855f7; border-bottom-color: #a855f7; }
         .shop-content { display: none; }
         .shop-content.active { display: grid; }
-
-        /* --- Live Feed Animation --- */
-        .feed-item {
-            animation: slideIn 0.5s ease forwards;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        /* --- Metallic Badge Gradients --- */
         .badge-silver { background: linear-gradient(145deg, #e0e0e0, #b0b0b0); }
         .badge-gold { background: linear-gradient(145deg, #fde047, #eab308); }
         .badge-holographic { background: linear-gradient(145deg, #f97316, #ec4899, #8b5cf6, #3b82f6); background-size: 400% 400%; animation: gradientBG 5s ease infinite; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .achievement-card.unlocked { opacity: 1; border-color: #fde047; }
         .achievement-card.locked { opacity: 0.6; filter: grayscale(50%); }
-
-        /* Custom scrollbar */
+        .feed-item { animation: slideIn 0.5s ease forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.6); border-radius: 10px; }
@@ -101,16 +44,32 @@
 </head>
 <body id="body-container" class="bg-black text-white">
 
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay" class="modal-overlay active">
+        <div class="glass-ui rounded-lg w-11/12 max-w-sm p-8 text-center">
+            <h2 class="text-3xl font-bold text-glow-purple mb-6">GRIDLOCK</h2>
+            <div id="login-view">
+                <input id="email" type="email" placeholder="Email" class="w-full bg-gray-800/50 p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4">
+                <input id="password" type="password" placeholder="Password" class="w-full bg-gray-800/50 p-3 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 mb-6">
+                <button onclick="handleLogin()" class="w-full bg-purple-600 hover:bg-purple-700 p-3 rounded-md font-bold transition-all">Login</button>
+                <p class="text-xs text-gray-400 mt-4">First time? An account will be created for you.</p>
+            </div>
+            <div id="loading-view" class="hidden">
+                <p>Loading Garage...</p>
+            </div>
+        </div>
+    </div>
+
     <canvas id="particle-canvas" class="fixed top-0 left-0 w-full h-full z-0"></canvas>
 
     <!-- MAIN GARAGE VIEW -->
-    <div id="main-garage" class="screen active">
+    <div id="main-garage" class="screen">
         <aside class="glass-ui fixed top-0 left-0 h-full w-full max-w-xs p-6 flex flex-col space-y-6 z-30 transition-transform duration-300 -translate-x-full md:translate-x-0 overflow-y-auto">
             <!-- User Profile -->
             <div class="flex items-center space-x-4">
-                <img src="https://i.pravatar.cc/80?u=player1" alt="User Avatar" class="w-16 h-16 rounded-full border-2 border-purple-400 neon-glow-purple">
+                <img id="user-avatar" src="https://i.pravatar.cc/80?u=player1" alt="User Avatar" class="w-16 h-16 rounded-full border-2 border-purple-400 neon-glow-purple">
                 <div>
-                    <h2 class="text-xl font-bold text-glow-purple">VAPORWAVE_DRIFTER</h2>
+                    <h2 id="user-name" class="text-xl font-bold text-glow-purple"></h2>
                     <div class="flex items-center space-x-2 mt-1">
                         <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                         <span id="points-counter" class="text-lg font-semibold">0</span>
@@ -122,9 +81,7 @@
             <!-- Live Event Feed -->
             <div>
                 <h3 class="text-lg font-semibold mb-3 text-glow-purple">Live Event Feed</h3>
-                <div id="live-feed" class="space-y-3 h-48 overflow-y-auto pr-2">
-                    <!-- Events will be injected here -->
-                </div>
+                <div id="live-feed" class="space-y-3 h-48 overflow-y-auto pr-2"></div>
             </div>
 
             <!-- My Gear -->
@@ -138,6 +95,7 @@
                 <h3 class="text-lg font-semibold mb-3 text-glow-purple">Team Leaderboard</h3>
                 <ul id="leaderboard" class="space-y-3"></ul>
             </div>
+             <button onclick="handleLogout()" class="mt-auto w-full glass-ui p-2 rounded-lg hover:bg-red-500/30 transition-all text-sm">Logout</button>
         </aside>
 
         <main class="w-full h-full flex items-center justify-center">
@@ -190,25 +148,32 @@
             <div id="inspector-content"></div>
         </div>
     </div>
+    
+    <div id="notification" class="fixed bottom-8 left-1/2 -translate-x-1/2 glass-ui p-4 rounded-lg z-50 flex items-center space-x-3"><span id="notification-text"></span></div>
 
-    <!-- Notification Popup -->
-    <div id="notification" class="fixed bottom-8 left-1/2 -translate-x-1/2 glass-ui p-4 rounded-lg z-50 flex items-center space-x-3">
-        <span id="notification-text"></span>
-    </div>
+    <!-- Firebase and App Logic -->
+    <script type="module">
+        // --- FIREBASE SETUP ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-    <script>
-        // --- DATA MODELS ---
-        let playerData = {
-            name: 'VAPORWAVE_DRIFTER',
-            points: 0,
-            owned: { cars: ['is350'], performance: [], visual: [], garageTheme: ['showroom'], garageAccessory: [] },
-            stats: { outboundCall: 0, inboundCall: 0, appointmentSet: 0, appointmentShow: 0, dealClosed: 0 },
-            unlockedAchievements: [],
-            lastLogin: null,
-            pointMultiplier: 1.0,
-            active: { car: 'is350', underglow: '#a855f7', garageTheme: 'showroom' },
+        const firebaseConfig = {
+            apiKey: "AIzaSyCiLSjG5Wtzx2Y_r9AFJz9bejATBE8d_Tk",
+            authDomain: "bdc-gamification-dashboard.firebaseapp.com",
+            projectId: "bdc-gamification-dashboard",
+            storageBucket: "bdc-gamification-dashboard.firebasestorage.app",
+            messagingSenderId: "1044123362075",
+            appId: "1:1044123362075:web:073e39b0110857a5ffa9be"
         };
 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // --- DATA MODELS ---
+        let playerData = null;
+        let teamData = {};
         const kpiData = { outboundCall: { points: 5, label: 'Outbound Call' }, inboundCall: { points: 10, label: 'Inbound Call' }, appointmentSet: { points: 50, label: 'Appointment Set' }, appointmentShow: { points: 100, label: 'Appointment Showed' }, dealClosed: { points: 250, label: 'Deal Closed' }, };
         const carData = [ { id: 'is350', name: 'IS 350 F Sport', cost: 0, rarity: 'common', img: 'https://assets.codepen.io/1556513/lexus-is-350-f-sport-white.png' }, { id: 'rx450h', name: 'RX 450h', cost: 1800, rarity: 'rare', img: 'https://assets.codepen.io/1556513/lexus-rx-450h-black.png' }, { id: 'lc500', name: 'LC 500', cost: 2500, rarity: 'rare', img: 'https://assets.codepen.io/1556513/lexus-lc-500-red.png' }, { id: 'porsche911', name: '911 Turbo S', cost: 4500, rarity: 'legendary', img: 'https://assets.codepen.io/1556513/porsche-911-turbo-s-blue.png' }, { id: 'ferrari488', name: '488 GTB', cost: 4800, rarity: 'legendary', img: 'https://assets.codepen.io/1556513/ferrari-488-gtb-red.png' }, { id: 'aventador', name: 'Aventador', cost: 5000, rarity: 'legendary', img: 'https://assets.codepen.io/1556513/lamborghini-aventador-yellow.png' } ];
         const upgradeData = {
@@ -225,29 +190,122 @@
             { id: 'firstCar', title: 'New Wheels', description: 'Buy your first car.', goal: { type: 'car', key: 'any', value: 2 }, reward: 200, badge: 'K', tier: 'silver' },
             { id: 'legendaryOwner', title: 'Collector', description: 'Own a legendary car.', goal: { type: 'car', key: 'legendary', value: 1 }, reward: 1000, badge: 'L', tier: 'holographic' },
         ];
-        let teamData = {
-            'NIGHT_SHADE': { points: 5200, active: {car: 'aventador'}, unlockedAchievements: ['firstDeal', 'legendaryOwner'] },
-            'GHOST_RACER': { points: 4500, active: {car: 'porsche911'}, unlockedAchievements: ['firstAppt'] }
+
+        // --- AUTHENTICATION ---
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    try {
+                        await createUserWithEmailAndPassword(auth, email, password);
+                    } catch (createError) {
+                        showNotification(createError.message, 'error');
+                    }
+                } else {
+                    showNotification(error.message, 'error');
+                }
+            }
         };
 
-        // --- DATA PERSISTENCE ---
-        function saveData() {
-            localStorage.setItem('gridlock_playerData', JSON.stringify(playerData));
-            localStorage.setItem('gridlock_teamData', JSON.stringify(teamData));
+        async function handleLogout() {
+            await signOut(auth);
+        };
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                document.getElementById('login-overlay').classList.remove('active');
+                document.getElementById('main-garage').classList.add('active');
+                loadData(user.uid, user.email);
+            } else {
+                document.getElementById('login-overlay').classList.add('active');
+                document.getElementById('main-garage').classList.remove('active');
+                if(window.eventInterval) clearInterval(window.eventInterval);
+            }
+        });
+
+        // --- DATA PERSISTENCE (FIRESTORE) ---
+        async function saveData() {
+            if (!auth.currentUser || !playerData) return;
+            const userRef = doc(db, 'users', auth.currentUser.uid);
+            await setDoc(userRef, playerData, { merge: true });
         }
 
-        function loadData() {
-            const savedPlayerData = localStorage.getItem('gridlock_playerData');
-            const savedTeamData = localStorage.getItem('gridlock_teamData');
-            if (savedPlayerData) {
-                playerData = JSON.parse(savedPlayerData);
+        async function loadData(userId, userEmail) {
+            const userRef = doc(db, 'users', userId);
+            const docSnap = await getDoc(userRef);
+
+            if (docSnap.exists()) {
+                playerData = docSnap.data();
+            } else {
+                playerData = {
+                    name: userEmail.split('@')[0].toUpperCase(),
+                    points: 0,
+                    owned: { cars: ['is350'], performance: [], visual: [], garageTheme: ['showroom'], garageAccessory: [] },
+                    stats: { outboundCall: 0, inboundCall: 0, appointmentSet: 0, appointmentShow: 0, dealClosed: 0 },
+                    unlockedAchievements: [],
+                    lastLogin: null,
+                    pointMultiplier: 1.0,
+                    active: { car: 'is350', underglow: '#a855f7', garageTheme: 'showroom' },
+                };
+                await saveData();
             }
-            if (savedTeamData) {
-                teamData = JSON.parse(savedTeamData);
-            }
+            initializeAppUI();
+            listenForTeamData();
         }
 
-        // --- CORE GAMIFICATION LOGIC ---
+        function listenForTeamData() {
+            const usersRef = collection(db, 'users');
+            onSnapshot(usersRef, (snapshot) => {
+                teamData = {};
+                snapshot.forEach(doc => {
+                    if (doc.id !== auth.currentUser.uid) {
+                        teamData[doc.id] = doc.data();
+                    }
+                });
+                updateLeaderboard();
+            });
+        }
+
+        // --- INITIALIZATION & SIMULATION ---
+        function initializeAppUI() {
+            document.getElementById('user-name').innerText = playerData.name;
+            document.getElementById('user-avatar').src = `https://i.pravatar.cc/80?u=${auth.currentUser.uid}`;
+            renderShop();
+            renderMyGear();
+            updateLeaderboard();
+            updateMultiplierDisplay();
+            activateVisual('garageTheme', playerData.active.garageTheme);
+            activateVisual('car', playerData.active.car);
+            activateVisual('underglow', playerData.active.underglow);
+            animatePoints(0, playerData.points);
+            dailyLoginCheck();
+            if(window.eventInterval) clearInterval(window.eventInterval);
+            window.eventInterval = setInterval(simulateLiveEvent, 8000);
+        }
+
+        function simulateLiveEvent() {
+            if (document.hidden) return;
+            const eventTypes = ['outboundCall', 'inboundCall', 'appointmentSet', 'appointmentShow', 'dealClosed'];
+            const eventWeights = [0.5, 0.3, 0.1, 0.07, 0.03];
+            const rand = Math.random();
+            let cumulativeWeight = 0;
+            let eventType = eventTypes[0];
+            for(let i=0; i < eventWeights.length; i++) {
+                cumulativeWeight += eventWeights[i];
+                if(rand < cumulativeWeight) { eventType = eventTypes[i]; break; }
+            }
+            const feedEl = document.getElementById('live-feed');
+            const newEvent = document.createElement('div');
+            newEvent.className = 'glass-ui p-2 rounded-md text-xs feed-item';
+            newEvent.innerHTML = `<span class="font-bold text-purple-300">[${new Date().toLocaleTimeString()}]</span> ${kpiData[eventType].label}`;
+            feedEl.prepend(newEvent);
+            if(feedEl.children.length > 10) { feedEl.lastChild.remove(); }
+            processEvent(eventType);
+        }
+
         function processEvent(kpiKey) {
             dailyLoginCheck();
             const kpi = kpiData[kpiKey];
@@ -259,17 +317,18 @@
             showNotification(`+${pointsEarned} pts for ${kpi.label}!`);
             checkAchievements();
         }
-
-        function addPoints(amount) {
+        
+        async function addPoints(amount) {
+            if(!playerData) return;
             const initialPoints = playerData.points;
             playerData.points += amount;
             animatePoints(initialPoints, playerData.points);
             updateLeaderboard();
-            saveData();
+            await saveData();
         }
 
-        function buyItem(type, itemId) {
-            const itemData = (upgradeData[type] || carData).find(i => i.id === itemId);
+        async function buyItem(type, itemId) {
+            const itemData = (type === 'cars' ? carData : upgradeData[type]).find(i => i.id === itemId);
             if (!itemData || playerData.owned[type].includes(itemId)) return;
 
             if (playerData.points >= itemData.cost) {
@@ -285,14 +344,14 @@
 
                 showNotification(message, "success");
                 renderShop();
-                checkAchievements();
-                saveData();
+                await checkAchievements();
+                await saveData();
             } else {
                 showNotification("Not enough points!", "error");
             }
         }
         
-        function activateVisual(type, value) {
+        async function activateVisual(type, value) {
             playerData.active[type] = value;
             if (type === 'car') {
                 const car = carData.find(c => c.id === value);
@@ -308,16 +367,16 @@
                 if(theme) document.getElementById('body-container').style.backgroundImage = `url('${theme.img}')`;
             }
             renderShop();
-            saveData();
+            await saveData();
         }
         
-        function checkAchievements() {
-            achievementData.forEach(ach => {
-                if (playerData.unlockedAchievements.includes(ach.id)) return;
+        async function checkAchievements() {
+            for (const ach of achievementData) {
+                if (playerData.unlockedAchievements.includes(ach.id)) continue;
                 let goalMet = false;
                 if (ach.goal.type === 'stat') {
                     if(ach.goal.key === 'totalCalls') {
-                        if(playerData.stats.outboundCall + playerData.stats.inboundCall >= ach.goal.value) goalMet = true;
+                        if((playerData.stats.outboundCall + playerData.stats.inboundCall) >= ach.goal.value) goalMet = true;
                     } else {
                         if (playerData.stats[ach.goal.key] >= ach.goal.value) goalMet = true;
                     }
@@ -331,19 +390,18 @@
 
                 if (goalMet) {
                     playerData.unlockedAchievements.push(ach.id);
-                    addPoints(ach.reward);
+                    await addPoints(ach.reward);
                     showNotification(`Achievement Unlocked: ${ach.title}! (+${ach.reward} pts)`, 'achievement');
                 }
-            });
+            }
         }
         
-        function dailyLoginCheck() {
+        async function dailyLoginCheck() {
             const today = new Date().toDateString();
             if (playerData.lastLogin !== today) {
                 playerData.lastLogin = today;
-                addPoints(100);
+                await addPoints(100);
                 showNotification("Daily Login Bonus: +100 pts!", "success");
-                saveData();
             }
         }
 
@@ -374,7 +432,14 @@
                     const isActive = playerData.active[itemType] === item.id || playerData.active[itemType] === item.value;
                     const cardClasses = `item-card glass-ui p-4 rounded-lg text-center border-2 border-transparent transition-all cursor-pointer ${isActive ? 'active-item' : ''} ${isOwned ? 'owned' : ''} ${!isOwned && !canAfford ? 'locked' : ''}`;
                     
-                    let cardHTML = `<div class="${cardClasses}" onclick="${isOwned && !isActive ? `activateVisual('${itemType}', '${item.id || item.value}')` : !isOwned ? `buyItem('${itemType}', '${item.id}')` : ''}">`;
+                    let clickAction = '';
+                    if (!isOwned) {
+                        clickAction = `buyItem('${itemType}', '${item.id}')`;
+                    } else if (itemType !== 'performance' && itemType !== 'garageAccessory' && !isActive) {
+                        clickAction = `activateVisual('${itemType}', '${item.id || item.value}')`;
+                    }
+
+                    let cardHTML = `<div class="${cardClasses}" ${clickAction ? `onclick="${clickAction}"` : ''}>`;
                     
                     if (key === 'cars') cardHTML += `<img src="${item.img}" class="h-40 mx-auto" alt="${item.name}"><h3 class="text-xl font-bold mt-4">${item.name}</h3>`;
                     else cardHTML += `<h3 class="font-bold text-lg">${item.name}</h3>`;
@@ -392,6 +457,7 @@
         
         function renderAchievements() {
             const grid = document.getElementById('achievement-grid');
+            if(!grid) return;
             grid.innerHTML = '';
             achievementData.forEach(ach => {
                 const isUnlocked = playerData.unlockedAchievements.includes(ach.id);
@@ -426,6 +492,7 @@
         function renderMyGear() {
             const gearGrid = document.getElementById('my-gear-grid');
             const container = document.getElementById('my-gear-container');
+            if(!gearGrid || !container) return;
             gearGrid.innerHTML = '';
             const ownedAccessories = playerData.owned.garageAccessory;
 
@@ -441,41 +508,43 @@
         }
 
         function updateLeaderboard() {
+            if (!playerData || !auth.currentUser) return;
             let fullLeaderboard = [
-                { name: playerData.name, points: playerData.points, isPlayer: true },
-                ...Object.entries(teamData).map(([name, data]) => ({ name, ...data, isPlayer: false }))
+                { name: playerData.name, points: playerData.points, isPlayer: true, id: auth.currentUser.uid },
+                ...Object.entries(teamData).map(([id, data]) => ({ id, ...data, isPlayer: false }))
             ];
             fullLeaderboard.sort((a, b) => b.points - a.points);
             
             const leaderboardEl = document.getElementById('leaderboard');
+            if(!leaderboardEl) return;
             leaderboardEl.innerHTML = '';
             fullLeaderboard.forEach((p, index) => {
                 const rank = index + 1;
                 const li = document.createElement('li');
                 li.className = `flex items-center justify-between text-sm ${p.isPlayer ? 'font-bold text-blue-300' : ''}`;
-                const nameEl = p.isPlayer ? `<span>${rank}. ${p.name}</span>` : `<button class="text-left hover:text-purple-400 transition" onclick="inspectPlayer('${p.name}')">${rank}. ${p.name}</button>`;
+                const nameEl = p.isPlayer ? `<span>${rank}. ${p.name}</span>` : `<button class="text-left hover:text-purple-400 transition" onclick="inspectPlayer('${p.id}')">${rank}. ${p.name}</button>`;
                 li.innerHTML = `${nameEl} <span class="${p.isPlayer ? 'text-blue-400' : 'text-gray-400'}">${p.points.toLocaleString()} pts</span>`;
                 leaderboardEl.appendChild(li);
             });
         }
 
-        function inspectPlayer(playerName) {
-            const playerData = teamData[playerName];
-            if (!playerData) return;
+        function inspectPlayer(playerId) {
+            const inspectedPlayerData = teamData[playerId];
+            if (!inspectedPlayerData) return;
             
-            const car = carData.find(c => c.id === playerData.active.car);
+            const car = carData.find(c => c.id === inspectedPlayerData.active.car);
             const contentEl = document.getElementById('inspector-content');
 
             let achievementsHTML = '<p class="text-sm text-gray-400">No Trophies Yet</p>';
-            if(playerData.unlockedAchievements.length > 0) {
-                achievementsHTML = playerData.unlockedAchievements.map(achId => {
+            if(inspectedPlayerData.unlockedAchievements.length > 0) {
+                achievementsHTML = inspectedPlayerData.unlockedAchievements.map(achId => {
                     const ach = achievementData.find(a => a.id === achId);
                     return `<div class="badge-${ach.tier} text-slate-800 rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl" title="${ach.title}">${ach.badge}</div>`;
                 }).join('');
             }
 
             contentEl.innerHTML = `
-                <h2 class="text-3xl font-bold text-glow-purple mb-4">${playerName}</h2>
+                <h2 class="text-3xl font-bold text-glow-purple mb-4">${inspectedPlayerData.name}</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <h3 class="font-semibold mb-2">Showcase Car</h3>
@@ -487,7 +556,7 @@
                     <div>
                         <h3 class="font-semibold mb-2">Stats</h3>
                         <div class="glass-ui rounded-lg p-4 space-y-2">
-                            <p><strong>Points:</strong> ${playerData.points.toLocaleString()}</p>
+                            <p><strong>Points:</strong> ${inspectedPlayerData.points.toLocaleString()}</p>
                             <h3 class="font-semibold pt-2">Trophy Case</h3>
                             <div class="flex flex-wrap gap-2">${achievementsHTML}</div>
                         </div>
@@ -503,6 +572,7 @@
         
         function updateMultiplierDisplay() {
             const display = document.getElementById('multiplier-display');
+            if(!display || !playerData) return;
             if (playerData.pointMultiplier > 1.0) {
                 const bonusPercent = (playerData.pointMultiplier - 1) * 100;
                 display.innerText = `+${bonusPercent.toFixed(0)}% Point Bonus`;
@@ -511,6 +581,7 @@
 
         function animatePoints(start, end) {
             const counter = document.getElementById('points-counter');
+            if(!counter) return;
             const duration = 1000;
             let startTimestamp = null;
             const step = (timestamp) => {
@@ -521,10 +592,12 @@
             };
             window.requestAnimationFrame(step);
         }
+        
         let notificationTimeout;
         function showNotification(message, type = "info") {
             const notification = document.getElementById('notification');
             const notificationText = document.getElementById('notification-text');
+            if(!notification || !notificationText) return;
             clearTimeout(notificationTimeout);
             notificationText.innerText = message;
             notification.className = 'fixed bottom-8 left-1/2 -translate-x-1/2 glass-ui p-4 rounded-lg z-50 flex items-center space-x-3';
@@ -535,59 +608,6 @@
             notificationTimeout = setTimeout(() => { notification.classList.remove('active'); }, 4000);
         }
 
-        // --- SIMULATION & INITIALIZATION ---
-        const eventTypes = ['outboundCall', 'inboundCall', 'appointmentSet', 'appointmentShow', 'dealClosed'];
-        const eventWeights = [0.5, 0.3, 0.1, 0.07, 0.03]; // Probabilities
-
-        function simulateLiveEvent() {
-            const rand = Math.random();
-            let cumulativeWeight = 0;
-            let eventType = eventTypes[0];
-
-            for(let i=0; i < eventWeights.length; i++) {
-                cumulativeWeight += eventWeights[i];
-                if(rand < cumulativeWeight) {
-                    eventType = eventTypes[i];
-                    break;
-                }
-            }
-
-            const feedEl = document.getElementById('live-feed');
-            const newEvent = document.createElement('div');
-            newEvent.className = 'glass-ui p-2 rounded-md text-xs feed-item';
-            newEvent.innerHTML = `<span class="font-bold text-purple-300">[${new Date().toLocaleTimeString()}]</span> ${kpiData[eventType].label}`;
-            feedEl.prepend(newEvent);
-            if(feedEl.children.length > 10) {
-                feedEl.lastChild.remove();
-            }
-            processEvent(eventType);
-        }
-
-        function simulateOtherPlayers() {
-            Object.keys(teamData).forEach(name => {
-                teamData[name].points += Math.floor(Math.random() * 20);
-            });
-            updateLeaderboard();
-            saveData();
-        }
-        
-        function initApp() {
-            loadData();
-            renderShop();
-            renderMyGear();
-            updateLeaderboard();
-            updateMultiplierDisplay();
-            activateVisual('garageTheme', playerData.active.garageTheme);
-            activateVisual('car', playerData.active.car);
-            activateVisual('underglow', playerData.active.underglow);
-            animatePoints(0, playerData.points);
-            dailyLoginCheck();
-            setInterval(simulateLiveEvent, 6000);
-            setInterval(simulateOtherPlayers, 5000);
-        }
-
-        document.addEventListener('DOMContentLoaded', initApp);
-
         function switchScreen(screenId) {
             document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
             const screenEl = document.getElementById(screenId);
@@ -595,6 +615,14 @@
             if (screenId === 'customization-shop') renderShop();
             if (screenId === 'achievements') renderAchievements();
         }
+
+        // Make functions globally accessible
+        Object.assign(window, {
+            handleLogin, handleLogout,
+            switchScreen, switchShopTab, inspectPlayer, closeInspector,
+            buyItem, activateVisual
+        });
+
     </script>
 </body>
 </html>

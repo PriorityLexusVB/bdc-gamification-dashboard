@@ -159,7 +159,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
         // IMPORTANT: Replace this with your actual environment variable in Netlify
-        const apiKey = "YOUR_API_KEY_HERE"; 
+        const apiKey = "<%= process.env.VITE_FIREBASE_API_KEY %>"; 
 
         const firebaseConfig = {
             apiKey: apiKey,

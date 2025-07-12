@@ -158,8 +158,11 @@
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+        // IMPORTANT: Replace this with your actual environment variable in Netlify
+        const apiKey = "YOUR_API_KEY_HERE"; 
+
         const firebaseConfig = {
-            apiKey: "AIzaSyCiLSjG5Wtzx2Y_r9AFJz9bejATBE8d_Tk",
+            apiKey: apiKey,
             authDomain: "bdc-gamification-dashboard.firebaseapp.com",
             projectId: "bdc-gamification-dashboard",
             storageBucket: "bdc-gamification-dashboard.firebasestorage.app",
@@ -261,7 +264,7 @@
             onSnapshot(usersRef, (snapshot) => {
                 teamData = {};
                 snapshot.forEach(doc => {
-                    if (doc.id !== auth.currentUser.uid) {
+                    if (auth.currentUser && doc.id !== auth.currentUser.uid) {
                         teamData[doc.id] = doc.data();
                     }
                 });

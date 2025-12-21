@@ -1,0 +1,38 @@
+{
+  "name": "bdc-gamification-dashboard",
+  "version": "0.1.0",
+  "description": "GRIDLOCK - BDC Gamification Dashboard for automotive dealerships",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'Development server not yet configured. Use: python3 -m http.server 8080'",
+    "build": "echo 'Build system not yet configured'",
+    "preview": "echo 'Preview not yet configured'",
+    "test": "echo 'No tests configured yet'",
+    "lint": "echo 'Linting not yet configured'"
+  },
+  "keywords": [
+    "gamification",
+    "bdc",
+    "automotive",
+    "dealership",
+    "dashboard",
+    "leaderboard",
+    "achievements"
+  ],
+  "author": "PriorityLexusVB",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PriorityLexusVB/bdc-gamification-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PriorityLexusVB/bdc-gamification-dashboard/issues"
+  },
+  "homepage": "https://github.com/PriorityLexusVB/bdc-gamification-dashboard#readme",
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
